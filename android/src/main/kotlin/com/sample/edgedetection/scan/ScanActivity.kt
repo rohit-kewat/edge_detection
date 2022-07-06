@@ -1,5 +1,6 @@
 package com.sample.edgedetection.scan
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -30,7 +31,9 @@ import org.opencv.imgcodecs.Imgcodecs
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
+import java.io.File
 
+@RequiresApi(Build.VERSION_CODES.N)
 class ScanActivity : BaseActivity(), IScanView.Proxy {
 
     private val REQUEST_CAMERA_PERMISSION = 0
@@ -49,55 +52,61 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
             Log.i(TAG, "loading opencv error, exit")
             finish()
         }
-        if (ContextCompat.checkSelfPermission(
-                        this,
-                        android.Manifest.permission.CAMERA
-                ) != PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(
-                        this,
-                        android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-                ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(
-                            android.Manifest.permission.CAMERA,
-                            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-                    ),
-                    REQUEST_CAMERA_PERMISSION
-            )
-        } else if (ContextCompat.checkSelfPermission(
-                        this,
-                        android.Manifest.permission.CAMERA
-                ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(android.Manifest.permission.CAMERA),
-                    REQUEST_CAMERA_PERMISSION
-            )
-        } else if (ContextCompat.checkSelfPermission(
-                        this,
-                        android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-                ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                    REQUEST_CAMERA_PERMISSION
-            )
+//        val gallery = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI)
+//            ActivityCompat.startActivityForResult(this, gallery, 1, null);
+        var bundle = intent.extras;
+        if (bundle != null){
+            onImageSelected(Uri.fromFile(File(bundle.getString("imagePath"))));
         }
-
-        shut.setOnClickListener {
-            if (mPresenter.canShut) {
-                mPresenter.shut()
-            }
-        }
-
-        gallery.setOnClickListener {
-            val gallery = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI)
-            ActivityCompat.startActivityForResult(this, gallery, 1, null);
-        };
+//        if (ContextCompat.checkSelfPermission(
+//                        this,
+//                        android.Manifest.permission.CAMERA
+//                ) != PackageManager.PERMISSION_GRANTED &&
+//                ContextCompat.checkSelfPermission(
+//                        this,
+//                        android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+//                ) != PackageManager.PERMISSION_GRANTED
+//        ) {
+//            ActivityCompat.requestPermissions(
+//                    this,
+//                    arrayOf(
+//                            android.Manifest.permission.CAMERA,
+//                            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+//                    ),
+//                    REQUEST_CAMERA_PERMISSION
+//            )
+//        } else if (ContextCompat.checkSelfPermission(
+//                        this,
+//                        android.Manifest.permission.CAMERA
+//                ) != PackageManager.PERMISSION_GRANTED
+//        ) {
+//            ActivityCompat.requestPermissions(
+//                    this,
+//                    arrayOf(android.Manifest.permission.CAMERA),
+//                    REQUEST_CAMERA_PERMISSION
+//            )
+//        } else if (ContextCompat.checkSelfPermission(
+//                        this,
+//                        android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+//                ) != PackageManager.PERMISSION_GRANTED
+//        ) {
+//            ActivityCompat.requestPermissions(
+//                    this,
+//                    arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE),
+//                    REQUEST_CAMERA_PERMISSION
+//            )
+//        }
+//
+//        shut.setOnClickListener {
+//            if (mPresenter.canShut) {
+//                mPresenter.shut()
+//            }
+//        }
+//
+//        gallery.setOnClickListener {
+//            val gallery = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI)
+//            ActivityCompat.startActivityForResult(this, gallery, 1, null);
+//        };
     }
 
 
@@ -115,51 +124,52 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
         finish()
     }
 
-    override fun onRequestPermissionsResult(
-            requestCode: Int,
-            permissions: Array<out String>,
-            grantResults: IntArray
-    ) {
-
-        var allGranted = false
-        var indexPermission = -1
-
-        if (requestCode == REQUEST_CAMERA_PERMISSION) {
-            if (grantResults.count() == 1) {
-                if (permissions.indexOf(android.Manifest.permission.CAMERA) >= 0) {
-                    indexPermission = permissions.indexOf(android.Manifest.permission.CAMERA)
-                }
-                if (permissions.indexOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) >= 0) {
-                    indexPermission =
-                            permissions.indexOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                }
-                if (indexPermission >= 0 && grantResults[indexPermission] == PackageManager.PERMISSION_GRANTED) {
-                    allGranted = true
-                }
-            }
-
-            if (grantResults.count() == 2 && (
-                            grantResults[permissions.indexOf(android.Manifest.permission.CAMERA)] == PackageManager.PERMISSION_GRANTED
-                                    && grantResults[permissions.indexOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)] == PackageManager.PERMISSION_GRANTED)
-            ) {
-                allGranted = true
-            }
-        }
-
-        if (allGranted) {
-            showMessage(R.string.camera_grant)
-            mPresenter.initCamera()
-            mPresenter.updateCamera()
-        }
-
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-    }
+//    override fun onRequestPermissionsResult(
+//            requestCode: Int,
+//            permissions: Array<out String>,
+//            grantResults: IntArray
+//    ) {
+//
+//        var allGranted = false
+//        var indexPermission = -1
+//        if (requestCode == REQUEST_CAMERA_PERMISSION) {
+//            if (grantResults.count() == 1) {
+//                if (permissions.indexOf(android.Manifest.permission.CAMERA) >= 0) {
+//                    indexPermission = permissions.indexOf(android.Manifest.permission.CAMERA)
+//                }
+//                if (permissions.indexOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) >= 0) {
+//                    indexPermission =
+//                        permissions.indexOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+//                }
+//                if (indexPermission >= 0 && grantResults[indexPermission] == PackageManager.PERMISSION_GRANTED) {
+//                    allGranted = true
+//                }
+//            }
+//
+//
+//            if (grantResults.count() == 2 && (
+//                            grantResults[permissions.indexOf(android.Manifest.permission.CAMERA)] == PackageManager.PERMISSION_GRANTED
+//                                    && grantResults[permissions.indexOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)] == PackageManager.PERMISSION_GRANTED)
+//            ) {
+//                allGranted = true
+//            }
+//        }
+//
+//        if (allGranted) {
+//            showMessage(R.string.camera_grant)
+//            mPresenter.initCamera()
+//            mPresenter.updateCamera()
+//        }
+//
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+//
+//    }
 
     override fun getCurrentDisplay(): Display? {
         return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
             this.display
-        } else {
+        }
+        else {
             this.windowManager.defaultDisplay
         }
     }

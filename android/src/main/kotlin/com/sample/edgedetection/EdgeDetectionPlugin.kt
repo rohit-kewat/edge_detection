@@ -1,8 +1,14 @@
 package com.sample.edgedetection
 
+import android.util.Log
+import android.net.Uri
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
+import android.os.Bundle
+import androidx.annotation.RequiresApi
 import com.sample.edgedetection.scan.ScanActivity
+import com.sample.edgedetection.scan.ScanPresenter
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -12,6 +18,7 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
+import java.io.File
 
 class EdgeDetectionPlugin : FlutterPlugin, ActivityAware {
     private var handler: EdgeDetectionHandler? = null
@@ -39,12 +46,14 @@ class EdgeDetectionHandler : MethodCallHandler, PluginRegistry.ActivityResultLis
     private var activityPluginBinding: ActivityPluginBinding? = null
     private var result: Result? = null
     private var methodCall: MethodCall? = null
+    private var imagePath : String = ""
 
     fun setActivityPluginBinding(activityPluginBinding: ActivityPluginBinding) {
         activityPluginBinding.addActivityResultListener(this)
         this.activityPluginBinding = activityPluginBinding
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun onMethodCall(call: MethodCall, result: Result) {
         when {
             getActivity() == null -> {
@@ -56,7 +65,8 @@ class EdgeDetectionHandler : MethodCallHandler, PluginRegistry.ActivityResultLis
                 return
             }
             call.method.equals("edge_detect") -> {
-                openCameraActivity(call, result)
+                imagePath = call.argument<String>("file").toString()
+                openCameraActivity(call, result, imagePath)
             }
             else -> {
                 result.notImplemented()
@@ -83,13 +93,17 @@ class EdgeDetectionHandler : MethodCallHandler, PluginRegistry.ActivityResultLis
         return false
     }
 
-    private fun openCameraActivity(call: MethodCall, result: Result) {
+    @RequiresApi(Build.VERSION_CODES.N)
+    private fun openCameraActivity(call: MethodCall, result: Result, imagePath: String) {
         if (!setPendingMethodCallAndResult(call, result)) {
             finishWithAlreadyActiveError()
             return
         }
 
         val intent = Intent(Intent(getActivity()?.applicationContext, ScanActivity::class.java))
+        var bundle = Bundle();
+        bundle.putString("imagePath", imagePath);
+        intent.putExtras(bundle)
         getActivity()?.startActivityForResult(intent, REQUEST_CODE)
     }
 

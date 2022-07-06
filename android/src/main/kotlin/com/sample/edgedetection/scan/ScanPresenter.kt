@@ -44,13 +44,12 @@ import android.util.Size as SizeB
 class ScanPresenter constructor(private val context: Context, private val iView: IScanView.Proxy) :
         SurfaceHolder.Callback, Camera.PictureCallback, Camera.PreviewCallback {
     private val TAG: String = "ScanPresenter"
-    private var mCamera: Camera? = null
+//    private var mCamera: Camera? = null
     private val mSurfaceHolder: SurfaceHolder = iView.getSurfaceView().holder
     private val executor: ExecutorService
     private val proxySchedule: Scheduler
     private var busy: Boolean = false
     private var mCameraLensFacing: String? = null
-
     private var mLastClickTime = 0L
     private var shutted: Boolean = true
 
@@ -70,45 +69,45 @@ class ScanPresenter constructor(private val context: Context, private val iView:
 
     fun start() {
 
-        mCamera?.startPreview() ?: Log.i(TAG, "camera null")
+//        mCamera?.startPreview() ?: Log.i(TAG, "camera null")
     }
 
     fun stop() {
-        mCamera?.stopPreview() ?: Log.i(TAG, "camera null")
+//        mCamera?.stopPreview() ?: Log.i(TAG, "camera null")
     }
 
     val canShut: Boolean get() = shutted
 
     fun shut() {
-        if (isOpenRecently()) {
-            Log.i(TAG, "NOT Taking click")
-            return
-        }
-        busy = true
-        shutted = false
-        Log.i(TAG, "try to focus")
-
-        mCamera?.autoFocus { b, _ ->
-            Log.i(TAG, "focus result: $b")
-            mCamera?.enableShutterSound(false)
-            mCamera?.takePicture(null, null, this)
-        }
+//        if (isOpenRecently()) {
+//            Log.i(TAG, "NOT Taking click")
+//            return
+//        }
+//        busy = true
+//        shutted = false
+//        Log.i(TAG, "try to focus")
+//
+//        mCamera?.autoFocus { b, _ ->
+//            Log.i(TAG, "focus result: $b")
+//            mCamera?.enableShutterSound(false)
+//            mCamera?.takePicture(null, null, this)
+//        }
 
     }
 
     fun updateCamera() {
-        if (null == mCamera) {
-            return
-        }
-        mCamera?.stopPreview()
-        try {
-            mCamera?.setPreviewDisplay(mSurfaceHolder)
-        } catch (e: IOException) {
-            e.printStackTrace()
-            return
-        }
-        mCamera?.setPreviewCallback(this)
-        mCamera?.startPreview()
+//        if (null == mCamera) {
+//            return
+//        }
+//        mCamera?.stopPreview()
+//        try {
+//            mCamera?.setPreviewDisplay(mSurfaceHolder)
+//        } catch (e: IOException) {
+//            e.printStackTrace()
+//            return
+//        }
+//        mCamera?.setPreviewCallback(this)
+//        mCamera?.startPreview()
     }
 
     private val cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
@@ -129,76 +128,76 @@ class ScanPresenter constructor(private val context: Context, private val iView:
     }
 
     fun initCamera() {
-
-        try {
-            mCamera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK)
-        } catch (e: RuntimeException) {
-            e.stackTrace
-            Toast.makeText(context, "cannot open camera, please grant camera", Toast.LENGTH_SHORT)
-                    .show()
-            return
-        }
-
-        val cameraCharacteristics = cameraManager.getCameraCharacteristics(getBackFacingCameraId()!!)
-
-        val param = mCamera?.parameters
-        val availble_res = getOptimalResolution()
-
-        //val size = getMaxResolution()
-
-        val size = iView.getCurrentDisplay()?.let {
-            getPreviewOutputSize(
-                    it, cameraCharacteristics, SurfaceHolder::class.java)
-        }
-        // Log.d(TAG, "View finder size: ${viewFinder.width} x ${viewFinder.height}")
-        Log.d(TAG, "Selected preview size: ${size?.width}${size?.height}")
-        // viewFinder.setAspectRatio(previewSize.width, previewSize.height)
-
-
-        size?.width?.toString()?.let { Log.i(TAG, it) }
-        param?.setPreviewSize(size?.width ?: 1920, size?.height ?: 1080)
-        val display = iView.getCurrentDisplay()
-        val point = Point()
-
-        display?.getRealSize(point)
-
-        val displayWidth = minOf(point.x, point.y)
-        val displayHeight = maxOf(point.x, point.y)
-        val displayRatio = displayWidth.div(displayHeight.toFloat())
-        val previewRatio = size?.height?.toFloat()?.div(size.width.toFloat()) ?: displayRatio
-        if (displayRatio > previewRatio) {
-            val surfaceParams = iView.getSurfaceView().layoutParams
-            surfaceParams.height = (displayHeight / displayRatio * previewRatio).toInt()
-            iView.getSurfaceView().layoutParams = surfaceParams
-        }
-
-        val supportPicSize = mCamera?.parameters?.supportedPictureSizes
-        supportPicSize?.sortByDescending { it.width.times(it.height) }
-        var pictureSize = supportPicSize?.find {
-            it.height.toFloat().div(it.width.toFloat()) - previewRatio < 0.01
-        }
-
-        if (null == pictureSize) {
-            pictureSize = supportPicSize?.get(0)
-        }
-
-        if (null == pictureSize) {
-            Log.e(TAG, "can not get picture size")
-        } else {
-            param?.setPictureSize(pictureSize.width, pictureSize.height)
-        }
-        val pm = context.packageManager
-        if (pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_AUTOFOCUS) && mCamera!!.parameters.supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
-            param?.focusMode = Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE
-            Log.d(TAG, "enabling autofocus")
-        } else {
-            Log.d(TAG, "autofocus not available")
-        }
-        param?.flashMode = Camera.Parameters.FLASH_MODE_OFF
-
-        mCamera?.parameters = param
-        mCamera?.setDisplayOrientation(90)
-        mCamera?.enableShutterSound(false)
+//
+//        try {
+//            mCamera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK)
+//        } catch (e: RuntimeException) {
+//            e.stackTrace
+//            Toast.makeText(context, "cannot open camera, please grant camera", Toast.LENGTH_SHORT)
+//                    .show()
+//            return
+//        }
+//
+//        val cameraCharacteristics = cameraManager.getCameraCharacteristics(getBackFacingCameraId()!!)
+//
+//        val param = mCamera?.parameters
+//        val availble_res = getOptimalResolution()
+//
+////        val size = getMaxResolution()
+//
+//        val size = iView.getCurrentDisplay()?.let {
+//            getPreviewOutputSize(
+//                    it, cameraCharacteristics, SurfaceHolder::class.java)
+//        }
+//        // Log.d(TAG, "View finder size: ${viewFinder.width} x ${viewFinder.height}")
+//        Log.d(TAG, "Selected preview size: ${size?.width}${size?.height}")
+////         viewFinder.setAspectRatio(previewSize.width, previewSize.height)
+//
+//
+//        size?.width?.toString()?.let { Log.i(TAG, it) }
+//        param?.setPreviewSize(size?.width ?: 1920, size?.height ?: 1080)
+//        val display = iView.getCurrentDisplay()
+//        val point = Point()
+//
+//        display?.getRealSize(point)
+//
+//        val displayWidth = minOf(point.x, point.y)
+//        val displayHeight = maxOf(point.x, point.y)
+//        val displayRatio = displayWidth.div(displayHeight.toFloat())
+//        val previewRatio = size?.height?.toFloat()?.div(size.width.toFloat()) ?: displayRatio
+//        if (displayRatio > previewRatio) {
+//            val surfaceParams = iView.getSurfaceView().layoutParams
+//            surfaceParams.height = (displayHeight / displayRatio * previewRatio).toInt()
+//            iView.getSurfaceView().layoutParams = surfaceParams
+//        }
+//
+//        val supportPicSize = mCamera?.parameters?.supportedPictureSizes
+//        supportPicSize?.sortByDescending { it.width.times(it.height) }
+//        var pictureSize = supportPicSize?.find {
+//            it.height.toFloat().div(it.width.toFloat()) - previewRatio < 0.01
+//        }
+//
+//        if (null == pictureSize) {
+//            pictureSize = supportPicSize?.get(0)
+//        }
+//
+//        if (null == pictureSize) {
+//            Log.e(TAG, "can not get picture size")
+//        } else {
+//            param?.setPictureSize(pictureSize.width, pictureSize.height)
+//        }
+//        val pm = context.packageManager
+//        if (pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_AUTOFOCUS) && mCamera!!.parameters.supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
+//            param?.focusMode = Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE
+//            Log.d(TAG, "enabling autofocus")
+//        } else {
+//            Log.d(TAG, "autofocus not available")
+//        }
+//        param?.flashMode = Camera.Parameters.FLASH_MODE_OFF
+//
+//        mCamera?.parameters = param
+//        mCamera?.setDisplayOrientation(90)
+//        mCamera?.enableShutterSound(false)
 
     }
 
@@ -218,12 +217,12 @@ class ScanPresenter constructor(private val context: Context, private val iView:
     }
 
     override fun surfaceDestroyed(p0: SurfaceHolder) {
-        synchronized(this) {
-            mCamera?.stopPreview()
-            mCamera?.setPreviewCallback(null)
-            mCamera?.release()
-            mCamera = null
-        }
+//        synchronized(this) {
+//            mCamera?.stopPreview()
+//            mCamera?.setPreviewCallback(null)
+//            mCamera?.release()
+//            mCamera = null
+//        }
     }
 
     override fun onPictureTaken(p0: ByteArray?, p1: Camera?) {
@@ -356,12 +355,12 @@ class ScanPresenter constructor(private val context: Context, private val iView:
     private fun getOptimalResolution(): Camera.Size? {
 
 
-        val resolutions = mCamera?.parameters?.supportedPreviewSizes
-        if (resolutions != null) {
-            for (item in resolutions) {
-                println("${item.width}, ${item.height}")
-            }
-        }
+//        val resolutions = mCamera?.parameters?.supportedPreviewSizes
+//        if (resolutions != null) {
+//            for (item in resolutions) {
+//                println("${item.width}, ${item.height}")
+//            }
+//        }
         return null
 
     }
