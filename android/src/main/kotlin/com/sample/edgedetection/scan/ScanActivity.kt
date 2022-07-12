@@ -2,11 +2,14 @@ package com.sample.edgedetection.scan
 
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.media.ExifInterface
 import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.sample.edgedetection.R
 import com.sample.edgedetection.REQUEST_CODE
 import com.sample.edgedetection.SCANNED_RESULT
@@ -29,24 +32,67 @@ import java.io.InputStream
 @RequiresApi(Build.VERSION_CODES.N)
 class ScanActivity : BaseActivity()  {
 
+    private val REQUEST_CAMERA_PERMISSION = 0
+
     override fun provideContentViewId(): Int = R.layout.activity_scan
 
     override fun initPresenter() {
     }
 
     override fun prepare() {
+
         if (!OpenCVLoader.initDebug()) {
             Log.i(TAG, "loading opencv error, exit")
             finish()
         }
+        if (ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                REQUEST_CAMERA_PERMISSION
+            )
+        }
+
         val bundle = intent.extras;
-        if (bundle != null){
+        if (bundle != null) {
             startDetectEdge(Uri.fromFile(File(bundle.getString("imagePath").toString())));
         }
 
     }
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        var allGranted = false
+        var indexPermission = -1
+
+        if (requestCode == REQUEST_CAMERA_PERMISSION) {
+            if (grantResults.count() == 1) {
+                if (permissions.indexOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) >= 0) {
+                    indexPermission =
+                        permissions.indexOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                }
+                if (indexPermission >= 0 && grantResults[indexPermission] == PackageManager.PERMISSION_GRANTED) {
+                    allGranted = true
+                }
+            }
+        }
+        if (allGranted) {
+            showMessage(R.string.save)
+
+        }
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == REQUEST_CODE) {
