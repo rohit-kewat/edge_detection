@@ -32,7 +32,7 @@ import java.io.InputStream
 @RequiresApi(Build.VERSION_CODES.N)
 class ScanActivity : BaseActivity()  {
 
-    private val REQUEST_CAMERA_PERMISSION = 0
+    private val REQUEST_STORAGE_PERMISSION = 0
 
     override fun provideContentViewId(): Int = R.layout.activity_scan
 
@@ -53,7 +53,7 @@ class ScanActivity : BaseActivity()  {
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                REQUEST_CAMERA_PERMISSION
+                REQUEST_STORAGE_PERMISSION
             )
         }
 
@@ -71,7 +71,7 @@ class ScanActivity : BaseActivity()  {
         var allGranted = false
         var indexPermission = -1
 
-        if (requestCode == REQUEST_CAMERA_PERMISSION) {
+        if (requestCode == REQUEST_STORAGE_PERMISSION) {
             if (grantResults.count() == 1) {
                 if (permissions.indexOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) >= 0) {
                     indexPermission =
