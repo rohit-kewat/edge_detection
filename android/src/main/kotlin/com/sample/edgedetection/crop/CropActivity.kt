@@ -85,7 +85,8 @@ class CropActivity : BaseActivity(), ICropView.Proxy {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
 
         if (item.itemId == android.R.id.home) {
-            onBackPressed()
+            setResult(Activity.RESULT_CANCELED, Intent())
+            finish()
             return true
         }
 

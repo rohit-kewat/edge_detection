@@ -1,14 +1,11 @@
 package com.sample.edgedetection
 
-import android.util.Log
-import android.net.Uri
 import android.app.Activity
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.annotation.RequiresApi
 import com.sample.edgedetection.scan.ScanActivity
-import com.sample.edgedetection.scan.ScanPresenter
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -18,7 +15,6 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
-import java.io.File
 
 class EdgeDetectionPlugin : FlutterPlugin, ActivityAware {
     private var handler: EdgeDetectionHandler? = null
@@ -26,7 +22,7 @@ class EdgeDetectionPlugin : FlutterPlugin, ActivityAware {
     override fun onAttachedToEngine(binding: FlutterPluginBinding) {
         handler = EdgeDetectionHandler()
         val channel = MethodChannel(
-                binding.binaryMessenger, "edge_detection"
+            binding.binaryMessenger, "edge_detection"
         )
         channel.setMethodCallHandler(handler)
     }
@@ -46,7 +42,6 @@ class EdgeDetectionHandler : MethodCallHandler, PluginRegistry.ActivityResultLis
     private var activityPluginBinding: ActivityPluginBinding? = null
     private var result: Result? = null
     private var methodCall: MethodCall? = null
-    private var imagePath : String = ""
 
     fun setActivityPluginBinding(activityPluginBinding: ActivityPluginBinding) {
         activityPluginBinding.addActivityResultListener(this)
@@ -58,14 +53,14 @@ class EdgeDetectionHandler : MethodCallHandler, PluginRegistry.ActivityResultLis
         when {
             getActivity() == null -> {
                 result.error(
-                        "no_activity",
-                        "edge_detection plugin requires a foreground activity.",
-                        null
+                    "no_activity",
+                    "edge_detection plugin requires a foreground activity.",
+                    null
                 )
                 return
             }
             call.method.equals("edge_detect") -> {
-                imagePath = call.argument<String>("file").toString()
+                val imagePath = call.argument<String>("file").toString()
                 openCameraActivity(call, result, imagePath)
             }
             else -> {
@@ -101,15 +96,15 @@ class EdgeDetectionHandler : MethodCallHandler, PluginRegistry.ActivityResultLis
         }
 
         val intent = Intent(Intent(getActivity()?.applicationContext, ScanActivity::class.java))
-        var bundle = Bundle();
-        bundle.putString("imagePath", imagePath);
+        val bundle = Bundle();
+        bundle.putString("imagePath", imagePath)
         intent.putExtras(bundle)
         getActivity()?.startActivityForResult(intent, REQUEST_CODE)
     }
 
     private fun setPendingMethodCallAndResult(
-            methodCall: MethodCall,
-            result: Result
+        methodCall: MethodCall,
+        result: Result
     ): Boolean {
         if (this.result != null) {
             return false
