@@ -2,6 +2,7 @@ package com.sample.edgedetection.crop
 
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -9,6 +10,8 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.sample.edgedetection.R
 import com.sample.edgedetection.SCANNED_RESULT
 import com.sample.edgedetection.base.BaseActivity
@@ -23,6 +26,17 @@ class CropActivity : BaseActivity(), ICropView.Proxy {
     private lateinit var mPresenter: CropPresenter
 
     override fun prepare() {
+        val REQUEST_STORAGE_PERMISSION = 0
+        if (ContextCompat.checkSelfPermission(this,android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                REQUEST_STORAGE_PERMISSION
+
+            )
+        }
         /*proceed.setOnClickListener {
             var path = mPresenter.proceed()
             setResult(Activity.RESULT_OK, Intent().putExtra(SCANNED_RESULT, path))
@@ -82,7 +96,7 @@ class CropActivity : BaseActivity(), ICropView.Proxy {
     }
 
     // handle button activities
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    override fun  onOptionsItemSelected(item: MenuItem): Boolean {
 
         if (item.itemId == android.R.id.home) {
             setResult(Activity.RESULT_CANCELED, Intent())
